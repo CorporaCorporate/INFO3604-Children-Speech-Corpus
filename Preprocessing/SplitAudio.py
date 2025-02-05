@@ -38,11 +38,17 @@ class SplitAudio:
         duration = SplitAudio.getAudioDuration(originalTrack)
         outputFormat = SplitAudio.getOutputFormat(originalTrack)
 
+
+        baseName = os.path.splitext(os.path.basename(originalTrack))[0]
+
+        outputFolder = os.path.join(os.path.dirname(originalTrack), baseName)
+        os.makedirs(outputFolder, exist_ok=True)
+
         numSegments = int(duration // segmentLength) + 1  # Round up to cover last segment
 
         for i in range(numSegments):
             startTime = i * segmentLength
-            outputFile = f"{os.path.splitext(originalTrack)[0]}_part{i+1}.{outputFormat}"
+            outputFile = os.path.join(outputFolder, f"{baseName}_part{i+1}.{outputFormat}")
 
             command = f'ffmpeg -i "{originalTrack}" -acodec copy -ss {startTime} -t {segmentLength} "{outputFile}"'
 
@@ -51,7 +57,7 @@ class SplitAudio:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python split_audio.py <original_track>")
+        print("Usage: python SplitAudio.py <original_track>")
         sys.exit(1)
 
 splitAudio = SplitAudio()
