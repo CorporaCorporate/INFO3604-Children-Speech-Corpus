@@ -1,6 +1,7 @@
 import sys
 import subprocess
 import os
+import CleanAudio as cleanAudio
 
 class SplitAudio:
     
@@ -29,7 +30,7 @@ class SplitAudio:
         return os.path.splitext(originalTrack)[-1][1:] # Removes the dot (e.g., "wav" from ".wav")
 
     @staticmethod
-    def splitAudio(originalTrack, segmentLength=150):
+    def splitAudio(originalTrack, segmentLength=120):
         if not os.path.exists(originalTrack):
             print(f"Error: File '{originalTrack}' not found.")
             sys.exit(1)
@@ -54,7 +55,13 @@ class SplitAudio:
 
             print(f"Creating: {outputFile} ({startTime}s - {startTime + segmentLength}s)")
             subprocess.run(command, shell=True)
+            SplitAudio.noiseReducer(outputFile, i)
 
+
+    @staticmethod
+    def noiseReducer(file, i):
+        cleanAudio.CleanAudio.reduceNoise(file)
+    
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python SplitAudio.py <original_track>")
