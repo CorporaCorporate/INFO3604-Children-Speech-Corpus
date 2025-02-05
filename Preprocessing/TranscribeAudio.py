@@ -6,7 +6,6 @@ import os
 
 class TranscribeAudio:
 
-
     def __init__(self, path):
         # whisper.torch.load = functools.partial(whisper.torch.load, weights_only=True)
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
