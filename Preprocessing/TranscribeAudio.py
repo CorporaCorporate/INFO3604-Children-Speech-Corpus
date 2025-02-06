@@ -1,48 +1,53 @@
 import whisper
 import torch
 import os
+import SplitAudio as splitAudio
 # import glob
 # from pydub import AudioSegment
 
-class TranscribeAudio:
+class TranscribeAudio():
 
     def __init__(self, path):
         # whisper.torch.load = functools.partial(whisper.torch.load, weights_only=True)
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.model = whisper.load_model('medium').to(self.device)
-        self.filePath = path
+        self.path = path
+        self.directories = []
+        self.rootdir = '/Users/christophegittens/Library/CloudStorage/OneDrive-TheUniversityoftheWestIndies,St.Augustine/Speech Corpus/Chaguanas/Std 2' #insert root dir here
 
-    def transcriber(audio):
-        result = audio.model.transcribe(path, fp16=False, word_timestamps=True)
+    def transcriber(self):
+        result = self.model.transcribe(self.path, fp16=False, word_timestamps=True)
         return result
 
-    def writeFile(audio):
-        result = audio.transcriber()
-        fileName = os.path.basename(path)
+    def writeFile(self):
+        result = self.transcriber()
+        fileName = os.path.basename(self.path)
         file = os.path.splitext(fileName)
         
         with open(file[0]+".txt", "w") as f:
             f.write(result["text"])
+    
+    def transcribeSplices(self):
+        i = 0
+        for subdir, dirs, files in os.walk(self.directories[i]):
+            for file in files:
+                if '_cleaned' in file:
+                    audio = TranscribeAudio(os.path.join(subdir, file))
+                    audio.writeFile()
+            i+=1
 
-filePaths = [
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 2.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 3.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 4.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 5.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 6.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 7.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 8.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 5/Std 5 raw/Std 5 read 9.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 4/Std 4 raw/Std 4 read 1.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 4/Std 4 raw/Std 4 read 2.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 4/Std 4 raw/Std 4 read 3.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 4/Std 4 raw/Std 4 read 4.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 4/Std 4 raw/Std 4 read 5.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 4/Std 4 raw/Std 4 read 6.wav',
-    '/Users/christophegittens/Library/CloudStorage/OneDrive-SharedLibraries-TheUniversityoftheWestIndies/Phaedra Mohammed - Speech Corpora Project/Chaguanas/Std 4/Std 4 raw/Std 4 read7.wav'
-    ] # paths to audio files
-
-for path in filePaths:
-    # print(path)
-    audio = TranscribeAudio(path)
-    audio.writeFile()
+    @staticmethod
+    def splitAndCleanAudio():
+        transcribeAudio = TranscribeAudio(None)
+        for subdir, dirs, files in os.walk(transcribeAudio.rootdir):
+            if 'comp' in subdir:
+                for file in files:
+                    if '.wav' in file:
+                        path = os.path.join(subdir, file)
+                        newPath, newDir = splitAudio.SplitAudio.splitAudio(path)
+                        transcribeAudio.directories.append(newDir)
+        
+        return transcribeAudio
+    
+transcribeAudio = TranscribeAudio(None).splitAndCleanAudio()
+transcribeAudio.transcribeSplices()              

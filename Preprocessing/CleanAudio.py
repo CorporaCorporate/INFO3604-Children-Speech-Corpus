@@ -14,10 +14,9 @@ class CleanAudio():
         baseName = os.path.splitext(os.path.basename(file))[0]
         outputFile = f"{dirPath}/{baseName}_cleaned.wav"
 
-        print(file)
-        print(outputFile)
-
         wavfile.write(outputFile, rate, reducedNoise)
+
+        return outputFile
 
 '''
 

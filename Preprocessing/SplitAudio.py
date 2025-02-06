@@ -3,7 +3,7 @@ import subprocess
 import os
 import CleanAudio as cleanAudio
 
-class SplitAudio:
+class SplitAudio():
     
     @staticmethod
     def checkffmpeg():
@@ -36,6 +36,7 @@ class SplitAudio:
             sys.exit(1)
 
         SplitAudio.checkffmpeg()
+        print(originalTrack)
         duration = SplitAudio.getAudioDuration(originalTrack)
         outputFormat = SplitAudio.getOutputFormat(originalTrack)
 
@@ -55,8 +56,9 @@ class SplitAudio:
 
             print(f"Creating: {outputFile} ({startTime}s - {startTime + segmentLength}s)")
             subprocess.run(command, shell=True)
-            SplitAudio.noiseReducer(outputFile, i)
+            outputFile = SplitAudio.noiseReducer(outputFile, i)
 
+        return outputFile, outputFolder
 
     @staticmethod
     def noiseReducer(file, i):
@@ -67,5 +69,5 @@ if __name__ == "__main__":
         print("Usage: python SplitAudio.py <original_track>")
         sys.exit(1)
 
-splitAudio = SplitAudio()
-splitAudio.splitAudio(sys.argv[1])
+# splitAudio = SplitAudio()
+# splitAudio.splitAudio(sys.argv[1])
