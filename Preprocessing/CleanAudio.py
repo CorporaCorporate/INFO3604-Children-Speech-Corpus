@@ -12,7 +12,7 @@ class CleanAudio():
         
         dirPath = os.path.dirname(file)  # Extracts the directory path only
         baseName = os.path.splitext(os.path.basename(file))[0]
-        outputFile = f"{dirPath}/{baseName}_cleaned.wav"
+        outputFile = f"{dirPath}/{baseName}.wav"
 
         wavfile.write(outputFile, rate, reducedNoise)
 
